@@ -19,7 +19,7 @@ var Player = function(x, y) {
 
 	game.Entity.call(this, 'Player', playerSprite, x, y, 0, null, game.stage);
 
-	this.speed = 7;
+	this.speed = 12;
 	this.score = 0;
 	this.exp = 0;
 	this.level = 1;
@@ -36,23 +36,19 @@ Player.prototype.constructor = Player;
 
 Player.prototype.levelUp = function() {
 	this.level++;
-	this.speed++;
 	this.exp = 0;
 	game.coinSpawnTime = game.coinSpawnTime * 0.85;
 
-	game.coinCount = 0;
-
-	game.stage.entities = [game.playArea(), this];
+	game.destroyAllCoins();
 
 	if (game.levelMeter) {
 		game.stage.removeEntity(game.levelMeter);	
 	}
 	
-	game.levelMeter = game.progressBar(1, 15, this.level - 1);
+	game.levelMeter = game.progressBar(1, 15, (this.level - 1)%12);
 	game.stage.addEntity(game.levelMeter);
 
 	game.util.playSound('./sounds/levelup.wav');
-	console.log('Level up! Level:', this.level);
 }
 
 Player.prototype.collide = function(collisions) {
@@ -79,6 +75,32 @@ Player.prototype.collide = function(collisions) {
 			}
 		}
 	});
+}
+
+Player.prototype.bomb = function() {
+	if (this.levelProgress() > 7) {
+		game.util.playSound('./sounds/bomb.wav');
+		this.exp = 0;
+
+		game.destroyAllCoins();
+
+		var bombSprite = new game.Sprite([new game.Grid(16, 16, null, 1)]);
+		var bombEntity = new game.Entity('bomb', bombSprite, 0, 15, null, null, game.stage);
+
+		function moveUpBomb() {
+			bombEntity.moveUp();
+
+			if (bombEntity.y >= -16 ) {
+				setTimeout(() => {
+					moveUpBomb();
+				}, 10);
+			} else {
+				bombEntity.destroy();
+			}
+		}
+
+		moveUpBomb();
+	}
 }
 
 Player.prototype.expForNextLevel = function(level) {
@@ -186,6 +208,13 @@ game.init = function() {
 		this.player.up = s ? true : false;
 	}, 14, 14);
 
+	//bomb
+	this.bind((x, y, s) => {
+		if (s) {
+			this.player.bomb();
+		}
+	}, 12, 15);
+
 	console.log('Game Started!');
 };
 
@@ -259,6 +288,11 @@ game.timeSinceLastCoinSpawn = function() {
 	return Date.now() - this.lastCoinSpawnTime;
 }
 
+game.destroyAllCoins = function() {
+	this.coinCount = 0;
+	this.stage.entities = [this.playArea(), this.player];
+}
+
 game.lose = function() {
 	this.gameOver = true;
 
@@ -280,10 +314,6 @@ game.lose = function() {
 			setTimeout(() => {
 				moveUpGameOver();
 			}, 100);
-		} else {
-			// game.init();
-			// game.stop();
-			// game.play();
 		}
 	}
 
@@ -310,7 +340,6 @@ game.tick = function(lastTime) {
 			this.coinCount++;
 			
 			this.lastCoinSpawnTime = Date.now();
-			// this.coinSpawnTime = this.coinSpawnTime * 0.99;
 		}
 	}
 };
