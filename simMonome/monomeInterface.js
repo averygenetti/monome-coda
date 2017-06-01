@@ -8,6 +8,13 @@ function MonomeInterface({width, height, container}) {
     this.height = height;
     this.container = container;
 
+    this._keyMappings = {
+        37: {col: width - 3, row: height - 1 }, //left
+        38: {col: width - 2, row: height - 2 }, //up
+        39: {col: width - 1, row: height - 1 }, //right
+        40: {col: width - 2, row: height - 1} //down
+    };
+
     this._init();
 }
 
@@ -27,6 +34,24 @@ MonomeInterface.prototype = {
             }
             $("<br/>").appendTo(this.container);
         }
+        var self = this;
+        window.onkeydown = function(e) {
+            var key = e.keyCode ? e.keyCode : e.which;
+            console.log('Got key ' + key);
+
+            var mappedKey = self._keyMappings[key];
+            if (mappedKey && self.eventHandler) {
+                self.eventHandler(mappedKey.col, mappedKey.row, 1);
+            }
+        };
+        window.onkeyup = function(e) {
+            var key = e.keyCode ? e.keyCode : e.which;
+
+            var mappedKey = self._keyMappings[key];
+            if (mappedKey && self.eventHandler) {
+                self.eventHandler(mappedKey.col, mappedKey.row, 0);
+            }
+        };
     },
     _mouseDown(row, col) {
         if (this.eventHandler) {
@@ -42,7 +67,6 @@ MonomeInterface.prototype = {
         this.eventHandler = eventHandler;
     },
     refresh(updateArray) {
-        console.log(updateArray);
         for (var row = 0; row < this.height; row++) {
             for (var col = 0; col < this.width; col++) {
                 var value = updateArray[row][col];
