@@ -1,8 +1,8 @@
 'use strict';
 
 // hello! it's coda!
-const Coda = function(width, height, fps, gameSpeed) {
-	this.monome = require('monome-grid')();
+const Coda = function({width, height, fps, gameSpeed, monome} = {}) {
+	this.monome = monome || require('monome-grid')();
 
 	this.util = require('./lib/util');
 	this.Grid = require('./lib/grid');

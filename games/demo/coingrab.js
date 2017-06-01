@@ -4,8 +4,8 @@ var Coda = require('../../coda');
 var Player = require('./player');
 var Coin = require('./coin');
 
-var CoinGrab = function(width, height, fps, gameSpeed) {
-	Coda.call(this, width, height, fps, gameSpeed);
+var CoinGrab = function({width, height, fps, gameSpeed, monome}) {
+	Coda.call(this, {width, height, fps, gameSpeed, monome});
 }
 
 CoinGrab.prototype = Object.create(Coda.prototype);
