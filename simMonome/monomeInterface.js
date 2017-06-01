@@ -20,9 +20,22 @@ MonomeInterface.prototype = {
                 this.grid[row][col] =
                     $("<button id='" + row + "-" + col + "'/>").
                     addClass('monomeButton').
+                    mousedown(this._mouseDown.bind(this, row, col)).
+                    mouseup(this._mouseUp.bind(this, row, col)).
+                    mouseout(this._mouseUp.bind(this, row, col)).
                     appendTo(this.container);
             }
             $("<br/>").appendTo(this.container);
+        }
+    },
+    _mouseDown(row, col) {
+        if (this.eventHandler) {
+            this.eventHandler(col, row, 1);
+        }
+    },
+    _mouseUp(row, col){
+        if (this.eventHandler) {
+            this.eventHandler(col, row, 0);
         }
     },
     key(eventHandler){
